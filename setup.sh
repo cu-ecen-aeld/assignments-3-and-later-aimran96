@@ -1,3 +1,5 @@
+# install all packages needed for assignment
+
 sudo apt install git
 sudo apt install cmake
 sudo apt install -y make
