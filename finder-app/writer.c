@@ -7,7 +7,7 @@
 #include <fcntl.h>
 
 int main( int argc, char *argv[] )  {
-   openlog("sysdemo", LOG_PID, LOG_USER);
+   openlog("writer app", LOG_PID, LOG_USER);
    if( argc == 3 ) {
    	printf("The argument supplied is 1) %s 2) %s\n", argv[1], argv[2]);
    	int outputFd;
