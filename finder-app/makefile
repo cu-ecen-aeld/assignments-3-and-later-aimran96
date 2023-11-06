@@ -1,12 +1,12 @@
 # Makefile for writer.c 
 # This automates the process of crosscompiling for the compiler type needed
-# 	in assignment 2
+# in assignment 2
 # Author: 	A. Saad Imran
 # Created: 	November 5, 2023
 
 # if the CROSS_COMPILE argument is set to aarch64-none-linux-gnu- ...
 ifeq ($(CROSS_COMPILE), aarch64-none-linux-gnu-)
-# we'll use the specified toolchain for compilation
+# we'll use the ARM toolchain for compilation
 CC=aarch64-none-linux-gnu-gcc
 else
 # otherwise, use regular gcc

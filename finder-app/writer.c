@@ -7,16 +7,21 @@
 int main( int argc, char *argv[] )  {
 
    if( argc == 3 ) {
-   	printf("The argument supplied is 1) %s 2) %s\n", argv[1], argv[2]);
+   	//printf("The argument supplied is 1) %s 2) %s\n", argv[1], argv[2]);
    	int outputFd;
 	outputFd = open(argv[1], O_WRONLY | O_CREAT , 0666);
 	if(outputFd == -1) {
 	    /* Error handling */
+	    // check errno here
 	    return 1;
 	}
 	ssize_t nr;
-	/* write the string in 'buf' to 'fd' */
+	/* write the string in 'argv[2]' to 'outputFd' */
 	nr = write (outputFd, argv[2], strlen (argv[2]));
+	if (nr == -1){
+		// check errno here
+		return 1;
+	}
 	return 0;
 	
    }
