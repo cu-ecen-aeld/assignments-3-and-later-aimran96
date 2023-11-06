@@ -12,18 +12,21 @@ int main( int argc, char *argv[] )  {
 	outputFd = open(argv[1], O_WRONLY | O_CREAT , 0666);
 	if(outputFd == -1) {
 	    /* Error handling */
-	    return -1;
+	    return 1;
 	}
 	ssize_t nr;
 	/* write the string in 'buf' to 'fd' */
 	nr = write (outputFd, argv[2], strlen (argv[2]));
+	return 0;
 	
    }
    else if( argc > 3 ) {
       printf("Too many arguments supplied.\n");
       printf("Two arguments expected.\n");
+      return 1;
    }
    else {
       printf("Two arguments expected.\n");
+      return 1;
    }
 }
