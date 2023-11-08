@@ -16,6 +16,9 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+    int status = system(cmd);
+    if (status == -1)
+        return false;
 
     return true;
 }
@@ -43,6 +46,7 @@ bool do_exec(int count, ...)
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
+        //printf("%s\n", command[i]);
     }
     command[count] = NULL;
     // this line is to avoid a compile warning before your implementation is complete
@@ -58,8 +62,26 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-
+    int pid = fork ();
+    if (pid == -1){
+        perror("fork");
+        return false;
+    }
+    /* the child ... */
+    else if (!pid) {
+        int ret = execv(command[0], command);
+        if (ret == -1){
+            perror("execv");
+            return false;
+        }
+    }
+    else {
+        int status;
+        waitpid (pid, &status, 0);
+        return status;
+    }
     va_end(args);
+    // https://stackoverflow.com/questions/19099663/how-to-correctly-use-fork-exec-wait
 
     return true;
 }
@@ -92,8 +114,39 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
-
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) { perror("open"); abort(); }
+    int pid = fork ();
+    if (pid == -1){
+        perror("fork");
+        return false;
+    }
+    /* the child ... */
+    else if (!pid) {
+        
+        if (dup2(fd, 1) < 0) { perror("dup2"); abort(); return false;}
+        close(fd);
+        int ret = execv(command[0], command);
+        if (ret == -1){
+            perror("execv");
+            return false;
+        }
+    }
+    else {
+        close(fd);
+    }
     va_end(args);
 
     return true;
 }
+/*
+Manual tests
+
+int main(){
+    do_system("echo hi");
+    do_exec(3, "../../finder-app/writer", "test.txt", "hello, world!");
+    do_exec_redirect("REDIRECT_FILE", 3, "/bin/sh", "-c", "echo home is $HOME");
+    return 0;
+}
+
+*/
