@@ -62,27 +62,24 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    va_end(args);
+    // https://stackoverflow.com/questions/19099663/how-to-correctly-use-fork-exec-wait
     int pid = fork ();
     if (pid == -1){
         perror("fork");
         return false;
     }
-    /* the child ... */
-    else if (!pid) {
-        int ret = execv(command[0], command);
-        if (ret == -1){
-            perror("execv");
-            return false;
-        }
+    int ret = execv(command[0], (char * const *)&(command[1]));
+    if (ret == -1){
+        perror("execv");
+        return false;
     }
-    else {
-        int status;
-        waitpid (pid, &status, 0);
-        return status;
+    int status;
+    waitpid (pid, &status, 0);
+    if (status == -1){
+        perror("waitpid");
+        return false;
     }
-    va_end(args);
-    // https://stackoverflow.com/questions/19099663/how-to-correctly-use-fork-exec-wait
-
     return true;
 }
 
@@ -114,6 +111,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    
+    va_end(args);
     int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
     if (fd < 0) { perror("open"); abort(); }
     int pid = fork ();
@@ -121,21 +120,13 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
         perror("fork");
         return false;
     }
-    /* the child ... */
-    else if (!pid) {
-        
-        if (dup2(fd, 1) < 0) { perror("dup2"); abort(); return false;}
-        close(fd);
-        int ret = execv(command[0], command);
-        if (ret == -1){
-            perror("execv");
-            return false;
-        }
+    if (dup2(fd, 1) < 0) { perror("dup2"); abort(); return false;}
+    close(fd);
+    int ret = execv(command[0], (char * const *)&(command[1]));
+    if (ret == -1){
+        perror("execv");
+        return false;
     }
-    else {
-        close(fd);
-    }
-    va_end(args);
 
     return true;
 }
